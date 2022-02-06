@@ -34,16 +34,15 @@ const onRequest = (request, response) => {
   // and parse them into a reusable object by field name
   const params = query.parse(parsedUrl.query);
 
-
   // grab the 'accept' headers (comma delimited) and split them into an array
   const acceptedTypes = request.headers.accept.split(',');
 
   // check if the path name (the /name part of the url) matches
   // any in our url object. If so call that function. If not, default to index.
   if (urlStruct[parsedUrl.pathname]) {
-    urlStruct[parsedUrl.pathname](request, response,acceptedTypes, params);
+    urlStruct[parsedUrl.pathname](request, response, acceptedTypes, params);
   } else {
-    urlStruct.notFound(request, response,acceptedTypes, params);
+    urlStruct.notFound(request, response, acceptedTypes, params);
   }
 };
 
