@@ -1,13 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
-  
+
   <script>
 
+const handleResponse = (response) => {
+
+
+      //grabbing this so I can pass this onto the page
+      const selectedURL = document.querySelector("#page");
+      //Grab the content section from the HTML so we can put things on the screen.
+      const content = document.querySelector('#content');
+      
+      content.textContent = "";
+      response.text().then((resText) => {
+        //Within this .then() handler, we now have resText as a variable and know we have a response.
+
+        //Let's grab the Content-Type header from the response. Content-Type defines what type of data
+        //the server sent back to us. It may not match the Accept header we sent to the server.
+        let contentType = response.headers.get('Content-Type');
+
+
+        //Add a horizontal rule.
+        content.appendChild(document.createElement('hr'));
+
+        const h2 = document.createElement('h2');
+        const rawData = document.createElement('p');
+
+        //Add the content type and raw response text to elements
+        h2.textContent = selectedURL.options[selectedURL.selectedIndex].text;
+        rawData.textContent = resText;
+
+        //making sure we print out the unparsed stuff to console
+        
+        console.log(resText);
+        //If the server sent back json
+        if(contentType === 'application/json') 
+        {
+          //Parse the json back into a javascript object, and display the data.
+          let parsedResponse = JSON.parse(resText); 
+        } else if (contentType === 'text/xml') 
+        { //If the server sent back xml
+          //Parse the xml into a document and select the data out.
+          let parsedResponse = new window.DOMParser().parseFromString(resText, 'text/xml');
+        }
+        content.appendChild(h2);
+        content.appendChild(rawData);       
+      });
+    };
+
+
+ 
+    const sendFetchRequest = (url, acceptedType) => {
+
+      const options = {
+        method: 'GET',
+        headers: {'Accept': acceptedType},
+      }
+      let fetchPromise = fetch(url, options);
+
+      fetchPromise.then((response) => { handleResponse(response) });
+    };
+
+
+    const init = () => {
+      //First we grab references to the two buttons in our HTML below.
+      //grab the selected url
+      const selectedURL = document.querySelector("#page");
+      const dataType = document.querySelector("#type");
+
+      const button = document.querySelector("#send");
+      
+      const sendData = () => {
+        sendFetchRequest(`${selectedURL.value}`, `${dataType.value}`)
+      };
+
+      
+      //Now that we have our functions defined above, we can have our click events call them. When someone clicks
+      //the button, the callback function will be called.
+      button.addEventListener('click', sendData);
+
+    };
+
+    window.onload = init;
   </script>
 </head>
+
 <body>
   <section id="top">
     <h3>Status Code Tests</h3>
@@ -29,4 +110,5 @@
   <section id="content">
   </section>
 </body>
+
 </html>
